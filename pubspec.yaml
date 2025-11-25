@@ -31,6 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Añadido para la gestión de estado (MVVM)
+  provider: ^6.1.2
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -57,10 +60,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  # Para que Flutter encuentre las imágenes de los productos:
+  assets:
+    - assets/images/ # Debes crear esta carpeta y colocar aquí tus 9 imágenes (product_1.png, etc.)
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
