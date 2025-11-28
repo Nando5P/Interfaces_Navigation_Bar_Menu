@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/productos.dart';
 
 class OrderSummaryScreen extends StatelessWidget {
-  static const routeName = '/resumen'; // Ruta nombrada
+  static const routeName = '/resumen';
 
   const OrderSummaryScreen({super.key});
 

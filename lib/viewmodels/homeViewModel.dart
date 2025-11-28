@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/productos.dart';
 
-/// Gestiona el estado de la lista principal de pedidos.
 class HomeViewModel extends ChangeNotifier {
   List<Order> _orders = [];
   List<Order> get orders => _orders;
@@ -10,7 +9,7 @@ class HomeViewModel extends ChangeNotifier {
     _loadInitialOrders();
   }
 
-  // Carga datos iniciales para cumplir con los requisitos
+  // Carga de datos iniciales
   void _loadInitialOrders() {
     _orders = [
       Order(
@@ -24,7 +23,7 @@ class HomeViewModel extends ChangeNotifier {
       ),
       Order(
         id: 'o2',
-        tableOrName: 'Nombre: Laura',
+        tableOrName: 'Noé',
         items: [
           OrderItem(menu[3], 3), // 3 Cafés
           OrderItem(menu[5], 1), // 1 Tarta
@@ -37,16 +36,16 @@ class HomeViewModel extends ChangeNotifier {
 
   void addOrder(Order order) {
     _orders.add(order);
-    notifyListeners(); // Notifica a la UI para que se redibuje
+    notifyListeners();
   }
 
-  // Método para eliminar un pedido (simular pago/entrega)
+  // Simular pago/entrega de un pedido
   void removeOrder(Order order) {
     _orders.remove(order);
     notifyListeners();
   }
 
-  // NUEVO MÉTODO: Actualiza un pedido existente
+  // Método para actualizar un pedido existente
   void updateOrder(Order updatedOrder) {
     final index = _orders.indexWhere((order) => order.id == updatedOrder.id);
     if (index != -1) {

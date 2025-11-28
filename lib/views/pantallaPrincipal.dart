@@ -13,7 +13,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   
-  // Modificado para aceptar un pedido opcional (para edición)
   void _createNewOrEditOrder({Order? orderToEdit}) async {
     final result = await Navigator.push(
       context,
@@ -22,17 +21,14 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    // Verificación de mounted antes de usar el contexto tras un await
     if (result != null && result is Order && mounted) {
       final viewModel = Provider.of<HomeViewModel>(context, listen: false);
       if (orderToEdit != null) {
-        // Si editamos, actualizamos el pedido existente
         viewModel.updateOrder(result);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pedido modificado correctamente.')),
         );
       } else {
-        // Si creamos, añadimos un nuevo pedido
         viewModel.addOrder(result);
       }
     }
@@ -70,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Botón de Edición (NUEVO)
+                      // Botón de Edición
                       IconButton(
                         icon: const Icon(Icons.edit, color: Colors.blueGrey),
                         tooltip: 'Editar pedido',
@@ -86,11 +82,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 10),
+                      // Botón de Eliminación
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         tooltip: 'Finalizar/Eliminar pedido',
                         onPressed: () {
-                          // Llamamos al método de eliminar del ViewModel
                           Provider.of<HomeViewModel>(context, listen: false).removeOrder(order);
                           
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _createNewOrEditOrder(), // Llama sin argumentos para crear nuevo
+        onPressed: () => _createNewOrEditOrder(),
         icon: const Icon(Icons.add),
         label: const Text('Nuevo Pedido'),
         backgroundColor: const Color.fromARGB(255, 2, 104, 219),

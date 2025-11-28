@@ -10,13 +10,11 @@ class ProductSelectionScreen extends StatefulWidget {
 }
 
 class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
-  // Mapa local para editar cantidades: Map<ProductId, Quantity>
   final Map<String, int> _quantities = {};
 
   @override
   void initState() {
     super.initState();
-    // Inicializamos con lo que ya venía seleccionado
     for (var item in widget.initialItems) {
       _quantities[item.product.id] = item.quantity;
     }
@@ -26,8 +24,8 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
     setState(() {
       int current = _quantities[id] ?? 0;
       int next = current + change;
-      if (next < 0) { // No permitimos cantidades negativas
-        _quantities.remove(id); // Si baja de 0, se elimina
+      if (next < 0) {            // No permitimos cantidades negativas
+        _quantities.remove(id);  // Si baja de 0, se elimina
       } else {
         _quantities[id] = next;
       }
@@ -35,14 +33,12 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
   }
 
   void _confirm() {
-    // Convertimos el mapa de vuelta a lista de OrderItem
     List<OrderItem> result = [];
     for (var product in menu) {
       if (_quantities.containsKey(product.id) && _quantities[product.id]! > 0) {
         result.add(OrderItem(product, _quantities[product.id]!));
       }
     }
-    // Devolvemos la lista de items seleccionados a la pantalla de creación
     Navigator.pop(context, result);
   }
 
@@ -64,15 +60,14 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
                 crossAxisCount: 6,
                 crossAxisSpacing: 8.0,
                 mainAxisSpacing: 8.0,
-                // Mantenemos 0.6 para altura corta
-                childAspectRatio: 0.6, 
+                mainAxisExtent: 300, // Tamaño fijo para cada tarjeta
               ),
               itemCount: menu.length,
               itemBuilder: (context, index) {
                 final product = menu[index];
                 final qty = _quantities[product.id] ?? 0;
                 return Card(
-                  elevation: 4,
+                  elevation: 4, 
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   child: Padding(
                     padding: const EdgeInsets.all(4.0),
@@ -80,21 +75,18 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Imagen del Producto (flex: 2 para que ocupe menos)
-                        Expanded(
-                          flex: 2,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 1.0),
-                            child: Image.asset(
-                              product.imageUrl, // Se usa la propiedad del modelo
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => 
-                                const Center(child: Icon(Icons.image_not_supported, size: 30, color: Colors.grey)),
-                            ),
+                        // Imagen del Producto
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4.0),
+                          child: Image.asset(
+                            product.imageUrl,
+                            height: 190, // Tamaño imagen
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => 
+                              const Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey)),
                           ),
                         ),
-                        
-                        // Nombre y Precio (AHORA SIN EXPANDED, ocupa solo el espacio necesario)
+                        // Nombre y Precio
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: Column(
@@ -105,7 +97,7 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 10,
+                                  fontSize: 12, // Texto más grande
                                   color: Colors.teal,
                                 ),
                                 maxLines: 2,
@@ -114,7 +106,7 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
                               Text(
                                 '${product.price.toStringAsFixed(2)} €',
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 14, // Precio más grande
                                   color: Colors.deepOrange,
                                   fontWeight: FontWeight.bold,
                                 ),

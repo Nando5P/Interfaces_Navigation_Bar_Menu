@@ -6,12 +6,11 @@ import 'seleccionProductos.dart';
 import 'order_summary_screen.dart';
 
 class CreateOrderScreen extends StatelessWidget {
-  final Order? initialOrder; // NUEVO: Pedido que se puede pasar para editar
+  final Order? initialOrder; 
   
   const CreateOrderScreen({super.key, this.initialOrder});
 
   void _goToProductSelection(BuildContext context, CreateOrderViewModel viewModel) async {
-    // Navegamos a la pantalla de selección y esperamos el resultado
     final selectedItems = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -19,14 +18,12 @@ class CreateOrderScreen extends StatelessWidget {
       ),
     );
 
-    // Si vuelven datos válidos, actualizamos el ViewModel
     if (selectedItems != null && selectedItems is List<OrderItem>) {
       viewModel.updateSelectedItems(selectedItems);
     }
   }
 
   void _goToSummary(BuildContext context, Order order) {
-    // Navegación con ruta con nombre (pushNamed) para el resumen
     Navigator.pushNamed(
       context,
       OrderSummaryScreen.routeName,
@@ -41,17 +38,15 @@ class CreateOrderScreen extends StatelessWidget {
       );
       return;
     }
-    // Devolvemos el pedido completo al Home (ya sea nuevo o editado)
     Navigator.pop(context, viewModel.createFinalOrder());
   }
 
   @override
   Widget build(BuildContext context) {
-    // Creamos el ViewModel específico para esta pantalla (scope local)
     return ChangeNotifierProvider(
       create: (_) {
         final viewModel = CreateOrderViewModel();
-        viewModel.initializeOrder(initialOrder); // Inicializamos si hay datos de edición
+        viewModel.initializeOrder(initialOrder);
         return viewModel;
       },
       child: Consumer<CreateOrderViewModel>(
@@ -76,7 +71,7 @@ class CreateOrderScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Botón para ir a selección de productos
+                  // Botón selección de productos
                   ElevatedButton.icon(
                     onPressed: () => _goToProductSelection(context, viewModel),
                     icon: const Icon(Icons.list_alt),
@@ -84,7 +79,6 @@ class CreateOrderScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Lista de resumen provisional
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text('Resumen:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -114,7 +108,7 @@ class CreateOrderScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Botón para ver resumen (solo lectura)
+                  // Botón ver resumen
                   Row(
                     children: [
                       Expanded(
@@ -127,13 +121,13 @@ class CreateOrderScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   
-                  // Botones de acción final (Cancelar / Guardar)
+                  // Botones Cancelar / Guardar
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                          onPressed: () => Navigator.pop(context), // Cancelar sin devolver nada
+                          onPressed: () => Navigator.pop(context),
                           child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
                         ),
                       ),
@@ -141,8 +135,7 @@ class CreateOrderScreen extends StatelessWidget {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: viewModel.canSave 
-                            ? () => _saveOrder(context, viewModel) 
-                            : null, // Deshabilitado si no es válido
+                            ? () => _saveOrder(context, viewModel) : null, 
                           child: Text(isEditing ? 'Actualizar Pedido' : 'Guardar Pedido'),
                         ),
                       ),
