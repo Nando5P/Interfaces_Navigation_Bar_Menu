@@ -1,16 +1,18 @@
-# t4_1
+# Práctica: Desarrollo de Interfaz de Navegación para Gestión de Bar
 
-A new Flutter project.
+¡Hola! Este repositorio contiene una práctica desarrollada para la asignatura de **Desarrollo de Interfaces**, dentro del ciclo superior de **Desarrollo de Aplicaciones Multiplataforma (DAM) Dual**.
 
-## Getting Started
+El objetivo principal es implementar una arquitectura de navegación sólida para una aplicación temática (en este caso, un sistema para un Bar), asegurando que la experiencia de usuario sea fluida y profesional.
 
-This project is a starting point for a Flutter application.
+## 📝 ¿De qué trata este proyecto?
+La aplicación consiste en una interfaz diseñada para la gestión o consulta de servicios de un Bar/Restaurante. Se centra en el uso de una **NavigationBar** (barra de navegación inferior) para conmutar entre las diferentes secciones del negocio (como la carta, pedidos o el perfil), gestionando el estado de la aplicación de forma eficiente.
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Tecnologías utilizadas
+* **Flutter & Dart**: Framework y lenguaje base para el desarrollo multiplataforma.
+* **Material Design 3**: Para una estética moderna y componentes interactivos.
+* **Widgets de Flutter**: Uso de `Scaffold`, `NavigationBar` y widgets personalizados para la lógica del bar.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## ✨ Características principales
+* **Navegación Intuitiva**: Menú inferior que permite saltar entre las funciones principales del bar rápidamente.
+* **Interfaz Adaptada**: Diseño pensado en la usabilidad real para empleados o clientes del sector servicios.
+* **Código Educativo**: Estructura organizada por módulos para facilitar el aprendizaje de la gestión de rutas y estados en Flutter.
