@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/productos.dart';
 
+/// Pantalla para la selección de productos del menú.
 class ProductSelectionScreen extends StatefulWidget {
   final List<OrderItem> initialItems;
   const ProductSelectionScreen({super.key, required this.initialItems});
@@ -9,9 +10,11 @@ class ProductSelectionScreen extends StatefulWidget {
   State<ProductSelectionScreen> createState() => _ProductSelectionScreenState();
 }
 
+/// Estado de la pantalla de selección de productos.
 class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
   final Map<String, int> _quantities = {};
 
+/// Inicializa el estado con las cantidades de los ítems iniciales.
   @override
   void initState() {
     super.initState();
@@ -20,6 +23,7 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
     }
   }
 
+/// Actualiza la cantidad de un producto específico.
   void _updateQuantity(String id, int change) {
     setState(() {
       int current = _quantities[id] ?? 0;
@@ -32,6 +36,7 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
     });
   }
 
+/// Confirma la selección y regresa a la pantalla anterior con los ítems seleccionados.
   void _confirm() {
     List<OrderItem> result = [];
     for (var product in menu) {
@@ -42,6 +47,7 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
     Navigator.pop(context, result);
   }
 
+/// Construye la UI de la pantalla de selección de productos.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

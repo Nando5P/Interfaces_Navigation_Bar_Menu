@@ -1,4 +1,4 @@
-// Modelo para productos del bar
+/// Modelo para productos del bar
 final List<Product> menu = [
   Product('m1', 'Estrella Galicia (33cl)', 3.50, 'assets/images/product_1.png'),
   Product('m2', 'Tapa Tortilla', 4.80, 'assets/images/product_2.png'),
@@ -11,6 +11,10 @@ final List<Product> menu = [
   Product('m9', 'Bocadillo de Calamares', 6.50, 'assets/images/product_9.png'),
 ];
 
+/// Representa un producto individual dentro de la carta del bar.
+/// 
+/// Contiene la información básica como nombre, precio e imagen necesaria
+/// para ser visualizado en las listas de selección.
 class Product {
   final String id;
   final String name;
@@ -20,7 +24,7 @@ class Product {
   const Product(this.id, this.name, this.price, this.imageUrl);
 }
 
-// Ítem dentro de un pedido (Producto + Cantidad).
+/// Ítem dentro de un pedido (Producto + Cantidad).
 class OrderItem {
   final Product product;
   int quantity;
@@ -30,6 +34,7 @@ class OrderItem {
   double get totalPrice => product.price * quantity;
 }
 
+/// Representa un pedido realizado por un cliente.
 class Order {
   final String id;
   final String tableOrName;

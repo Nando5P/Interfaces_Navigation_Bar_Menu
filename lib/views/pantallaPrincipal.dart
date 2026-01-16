@@ -4,6 +4,7 @@ import '../viewmodels/homeViewModel.dart';
 import '../models/productos.dart';
 import 'crearPedidoView.dart';
 
+/// Pantalla principal que muestra la lista de pedidos actuales.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -11,8 +12,10 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+/// Estado de la pantalla principal.
 class _HomeScreenState extends State<HomeScreen> {
   
+  /// Crea un nuevo pedido o edita uno existente.
   void _createNewOrEditOrder({Order? orderToEdit}) async {
     final result = await Navigator.push(
       context,
@@ -34,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+/// Construye la UI de la pantalla principal.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

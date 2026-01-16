@@ -5,11 +5,13 @@ import '../models/productos.dart';
 import 'seleccionProductos.dart';
 import 'order_summary_screen.dart';
 
+/// Pantalla para crear o editar un pedido.
 class CreateOrderScreen extends StatelessWidget {
   final Order? initialOrder; 
   
   const CreateOrderScreen({super.key, this.initialOrder});
 
+/// Navega a la pantalla de selección de productos y actualiza los ítems seleccionados.
   void _goToProductSelection(BuildContext context, CreateOrderViewModel viewModel) async {
     final selectedItems = await Navigator.push(
       context,
@@ -23,6 +25,7 @@ class CreateOrderScreen extends StatelessWidget {
     }
   }
 
+/// Navega a la pantalla de resumen del pedido.
   void _goToSummary(BuildContext context, Order order) {
     Navigator.pushNamed(
       context,
@@ -31,6 +34,7 @@ class CreateOrderScreen extends StatelessWidget {
     );
   }
 
+/// Guarda el pedido y regresa a la pantalla anterior.
   void _saveOrder(BuildContext context, CreateOrderViewModel viewModel) {
     if (!viewModel.canSave) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -41,6 +45,7 @@ class CreateOrderScreen extends StatelessWidget {
     Navigator.pop(context, viewModel.createFinalOrder());
   }
 
+/// Construye la UI de la pantalla de creación/edición de pedidos.
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(

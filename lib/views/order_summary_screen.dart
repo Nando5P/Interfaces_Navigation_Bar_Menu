@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/productos.dart';
 
+/// Pantalla que muestra el resumen final de un pedido.
 class OrderSummaryScreen extends StatelessWidget {
   static const routeName = '/resumen';
 
   const OrderSummaryScreen({super.key});
 
+/// Construye la UI de la pantalla de resumen del pedido.
   @override
   Widget build(BuildContext context) {
     // Recuperar argumentos de la ruta

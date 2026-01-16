@@ -4,13 +4,16 @@ import 'views/pantallaPrincipal.dart';
 import 'views/order_summary_screen.dart';
 import 'viewmodels/homeViewModel.dart';
 
+/// Punto de entrada de la aplicación.
 void main() {
   runApp(const BarApp());
 }
 
+/// Widget principal de la aplicación.
 class BarApp extends StatelessWidget {
   const BarApp({super.key});
 
+/// Construye la UI de la aplicación.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
