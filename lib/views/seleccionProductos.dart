@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/productos.dart';
 
-/// Pantalla para la selección de productos del menú.
+/// Pantalla que despliega la carta del bar para que el usuario seleccione productos.
+/// 
+/// Gestiona un estado local de cantidades mediante un [Map] y permite 
+/// sincronizar la selección con los datos previos del pedido.
 class ProductSelectionScreen extends StatefulWidget {
   final List<OrderItem> initialItems;
   const ProductSelectionScreen({super.key, required this.initialItems});
@@ -10,11 +13,11 @@ class ProductSelectionScreen extends StatefulWidget {
   State<ProductSelectionScreen> createState() => _ProductSelectionScreenState();
 }
 
-/// Estado de la pantalla de selección de productos.
+/// Estado que controla la lógica de incremento/decremento de productos.
 class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
   final Map<String, int> _quantities = {};
 
-/// Inicializa el estado con las cantidades de los ítems iniciales.
+  /// Inicializa las cantidades basándose en los ítems que ya estaban en el pedido.
   @override
   void initState() {
     super.initState();
@@ -23,20 +26,23 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
     }
   }
 
-/// Actualiza la cantidad de un producto específico.
+  /// Actualiza la cantidad de un producto. Si la cantidad llega a 0, se mantiene en el mapa
+  /// para permitir volver a incrementarla fácilmente, pero no se incluirá al confirmar.
   void _updateQuantity(String id, int change) {
     setState(() {
       int current = _quantities[id] ?? 0;
       int next = current + change;
-      if (next < 0) {            // No permitimos cantidades negativas
-        _quantities.remove(id);  // Si baja de 0, se elimina
+      if (next < 0) {
+        _quantities[id] = 0; // Evitamos negativos
       } else {
         _quantities[id] = next;
       }
     });
   }
 
-/// Confirma la selección y regresa a la pantalla anterior con los ítems seleccionados.
+  /// Valida que haya al menos un producto seleccionado antes de cerrar.
+  /// 
+  /// Si la validación falla, muestra un [SnackBar] de error.
   void _confirm() {
     List<OrderItem> result = [];
     for (var product in menu) {
@@ -44,10 +50,20 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
         result.add(OrderItem(product, _quantities[product.id]!));
       }
     }
-    Navigator.pop(context, result);
+
+    if (result.isEmpty) {
+      // Validación: No permitir confirmar si no hay nada seleccionado
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: Selecciona al menos un producto para continuar.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } else {
+      Navigator.pop(context, result);
+    }
   }
 
-/// Construye la UI de la pantalla de selección de productos.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,12 +77,11 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(8.0),
-              // Definimos 6 columnas
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 6,
                 crossAxisSpacing: 8.0,
                 mainAxisSpacing: 8.0,
-                mainAxisExtent: 300, // Tamaño fijo para cada tarjeta
+                mainAxisExtent: 320, 
               ),
               itemCount: menu.length,
               itemBuilder: (context, index) {
@@ -81,47 +96,22 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Imagen del Producto
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4.0),
-                          child: Image.asset(
-                            product.imageUrl,
-                            height: 190, // Tamaño imagen
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) => 
-                              const Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey)),
-                          ),
+                        // Imagen con gestión de error
+                        Image.asset(
+                          product.imageUrl,
+                          height: 190,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => 
+                            const Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey)),
                         ),
-                        // Nombre y Precio
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                product.name,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12, // Texto más grande
-                                  color: Colors.teal,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                '${product.price.toStringAsFixed(2)} €',
-                                style: const TextStyle(
-                                  fontSize: 14, // Precio más grande
-                                  color: Colors.deepOrange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                        // Información del producto
+                        Column(
+                          children: [
+                            Text(product.name, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.teal)),
+                            Text('${product.price.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 14, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+                          ],
                         ),
-                        
-                        // Controles de Cantidad
+                        // Controles de cantidad con Tooltips
                         Container(
                           margin: const EdgeInsets.symmetric(vertical: 4),
                           decoration: BoxDecoration(
@@ -132,31 +122,20 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove, color: Colors.deepOrange, size: 16),
-                                onPressed: () => _updateQuantity(product.id, -1),
-                                visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.zero,
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border(
-                                    left: BorderSide(color: Colors.teal.shade200),
-                                    right: BorderSide(color: Colors.teal.shade200),
-                                  ),
-                                ),
-                                child: Text(
-                                  '$qty',
-                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.teal),
+                              Tooltip(
+                                message: 'Quitar unidad',
+                                child: IconButton(
+                                  icon: const Icon(Icons.remove, color: Colors.deepOrange, size: 16),
+                                  onPressed: () => _updateQuantity(product.id, -1),
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.add, color: Colors.green, size: 16),
-                                onPressed: () => _updateQuantity(product.id, 1),
-                                visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.zero,
+                              Text('$qty', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.teal)),
+                              Tooltip(
+                                message: 'Añadir unidad',
+                                child: IconButton(
+                                  icon: const Icon(Icons.add, color: Colors.green, size: 16),
+                                  onPressed: () => _updateQuantity(product.id, 1),
+                                ),
                               ),
                             ],
                           ),
@@ -168,24 +147,30 @@ class _ProductSelectionScreenState extends State<ProductSelectionScreen> {
               },
             ),
           ),
-          // Botones de Confirmar/Cancelar
+          // Botones de acción final
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context), // Cancelar sin devolver nada
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade400, foregroundColor: Colors.white),
-                    child: const Text('Cancelar'),
+                  child: Tooltip(
+                    message: 'Volver atrás sin guardar cambios',
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade400, foregroundColor: Colors.white),
+                      child: const Text('Cancelar'),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: _confirm, // Confirma y devuelve la selección
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
-                    child: const Text('Confirmar'),
+                  child: Tooltip(
+                    message: 'Confirmar selección de productos',
+                    child: ElevatedButton(
+                      onPressed: _confirm,
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
+                      child: const Text('Confirmar'),
+                    ),
                   ),
                 ),
               ],

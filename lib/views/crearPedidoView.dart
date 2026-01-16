@@ -5,13 +5,18 @@ import '../models/productos.dart';
 import 'seleccionProductos.dart';
 import 'order_summary_screen.dart';
 
-/// Pantalla para crear o editar un pedido.
+/// Pantalla para crear o editar un pedido de la aplicación del Bar.
+/// 
+/// Permite al usuario asignar una mesa, seleccionar productos y ver un resumen
+/// antes de confirmar el guardado.
 class CreateOrderScreen extends StatelessWidget {
   final Order? initialOrder; 
   
   const CreateOrderScreen({super.key, this.initialOrder});
 
-/// Navega a la pantalla de selección de productos y actualiza los ítems seleccionados.
+  /// Navega a la pantalla de selección de productos.
+  /// 
+  /// Muestra un [SnackBar] informativo al regresar si se han actualizado los ítems.
   void _goToProductSelection(BuildContext context, CreateOrderViewModel viewModel) async {
     final selectedItems = await Navigator.push(
       context,
@@ -22,10 +27,17 @@ class CreateOrderScreen extends StatelessWidget {
 
     if (selectedItems != null && selectedItems is List<OrderItem>) {
       viewModel.updateSelectedItems(selectedItems);
+      // Snackbar de feedback al volver de la selección
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lista de productos actualizada'),
+          duration: Duration(seconds: 1),
+        ),
+      );
     }
   }
 
-/// Navega a la pantalla de resumen del pedido.
+  /// Navega a la pantalla de resumen detallado del pedido.
   void _goToSummary(BuildContext context, Order order) {
     Navigator.pushNamed(
       context,
@@ -34,18 +46,24 @@ class CreateOrderScreen extends StatelessWidget {
     );
   }
 
-/// Guarda el pedido y regresa a la pantalla anterior.
+  /// Valida y guarda el pedido.
+  /// 
+  /// Muestra un error mediante [SnackBar] si el pedido no es válido.
   void _saveOrder(BuildContext context, CreateOrderViewModel viewModel) {
     if (!viewModel.canSave) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Faltan datos (Mesa o Productos).')),
+        const SnackBar(
+          content: Text('Error: Debes indicar una mesa y añadir al menos un producto.'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
+    
+    // Si todo es correcto, cerramos devolviendo el pedido
     Navigator.pop(context, viewModel.createFinalOrder());
   }
 
-/// Construye la UI de la pantalla de creación/edición de pedidos.
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -64,23 +82,28 @@ class CreateOrderScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Campo para Nombre/Mesa
+                  // Validación visual en el campo de texto
                   TextFormField(
                     initialValue: viewModel.tableOrName,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Mesa o Nombre',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.table_restaurant),
+                      hintText: 'Ej: Mesa 5 o Juan Pérez',
+                      errorText: viewModel.tableOrName.isEmpty ? 'Este campo es obligatorio' : null,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.table_restaurant),
                     ),
                     onChanged: viewModel.setTableOrName,
                   ),
                   const SizedBox(height: 16),
                   
-                  // Botón selección de productos
-                  ElevatedButton.icon(
-                    onPressed: () => _goToProductSelection(context, viewModel),
-                    icon: const Icon(Icons.list_alt),
-                    label: const Text('Seleccionar Productos'),
+                  // Botón selección de productos con Tooltip
+                  Tooltip(
+                    message: 'Abrir el catálogo de productos',
+                    child: ElevatedButton.icon(
+                      onPressed: () => _goToProductSelection(context, viewModel),
+                      icon: const Icon(Icons.list_alt),
+                      label: const Text('Seleccionar Productos'),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   
@@ -113,35 +136,44 @@ class CreateOrderScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Botón ver resumen
+                  // Botón ver resumen con Tooltip
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => _goToSummary(context, viewModel.createFinalOrder()),
-                          child: const Text('Ver Resumen Final'),
+                        child: Tooltip(
+                          message: 'Revisar todos los detalles antes de guardar',
+                          child: OutlinedButton(
+                            onPressed: () => _goToSummary(context, viewModel.createFinalOrder()),
+                            child: const Text('Ver Resumen Final'),
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
                   
-                  // Botones Cancelar / Guardar
+                  // Botones Cancelar / Guardar con Tooltips
                   Row(
                     children: [
                       Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+                        child: Tooltip(
+                          message: 'Salir sin guardar los cambios',
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: ElevatedButton(
-                          onPressed: viewModel.canSave 
-                            ? () => _saveOrder(context, viewModel) : null, 
-                          child: Text(isEditing ? 'Actualizar Pedido' : 'Guardar Pedido'),
+                        child: Tooltip(
+                          message: isEditing ? 'Actualizar los datos del pedido' : 'Registrar el pedido en el sistema',
+                          child: ElevatedButton(
+                            onPressed: viewModel.canSave 
+                              ? () => _saveOrder(context, viewModel) : null, 
+                            child: Text(isEditing ? 'Actualizar Pedido' : 'Guardar Pedido'),
+                          ),
                         ),
                       ),
                     ],

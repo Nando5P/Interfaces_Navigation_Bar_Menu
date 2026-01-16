@@ -4,7 +4,10 @@ import '../viewmodels/homeViewModel.dart';
 import '../models/productos.dart';
 import 'crearPedidoView.dart';
 
-/// Pantalla principal que muestra la lista de pedidos actuales.
+/// Pantalla principal que gestiona y visualiza el listado de pedidos activos del bar.
+/// 
+/// Permite al usuario ver un resumen de todas las mesas, editar pedidos existentes
+/// o eliminarlos una vez finalizados.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -12,10 +15,13 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-/// Estado de la pantalla principal.
+/// Estado de la pantalla principal que maneja la lógica de navegación y feedback.
 class _HomeScreenState extends State<HomeScreen> {
   
-  /// Crea un nuevo pedido o edita uno existente.
+  /// Inicia el flujo para crear un nuevo pedido o modificar uno existente.
+  /// 
+  /// Al regresar de la pantalla de creación, si hay datos válidos, se actualiza
+  /// el [HomeViewModel] y se muestra un [SnackBar] informativo.
   void _createNewOrEditOrder({Order? orderToEdit}) async {
     final result = await Navigator.push(
       context,
@@ -29,15 +35,58 @@ class _HomeScreenState extends State<HomeScreen> {
       if (orderToEdit != null) {
         viewModel.updateOrder(result);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pedido modificado correctamente.')),
+          const SnackBar(
+            content: Text('Pedido modificado correctamente.'),
+            backgroundColor: Colors.blueAccent,
+          ),
         );
       } else {
         viewModel.addOrder(result);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nuevo pedido añadido a la lista.'),
+            backgroundColor: Colors.green,
+          ),
+        );
       }
     }
   }
 
-/// Construye la UI de la pantalla principal.
+  /// Muestra un diálogo de confirmación antes de eliminar un pedido.
+  /// 
+  /// Esta validación evita que el usuario borre una comanda por accidente.
+  void _confirmarEliminacion(BuildContext context, Order order) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('¿Finalizar pedido?'),
+          content: Text('Se eliminará el pedido de "${order.tableOrName}" de la lista.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('CANCELAR'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () {
+                Provider.of<HomeViewModel>(context, listen: false).removeOrder(order);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pedido finalizado y eliminado'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+              child: const Text('ELIMINAR', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +98,9 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Consumer<HomeViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.orders.isEmpty) {
-            return const Center(child: Text('No hay pedidos activos.'));
+            return const Center(
+              child: Text('No hay pedidos activos.', style: TextStyle(fontSize: 16, color: Colors.grey)),
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.all(8.0),
@@ -66,15 +117,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     order.tableOrName,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text('${order.totalProducts} productos'),
+                  subtitle: Text('${order.totalProducts} productos seleccionados'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Botón de Edición
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blueGrey),
-                        tooltip: 'Editar pedido',
-                        onPressed: () => _createNewOrEditOrder(orderToEdit: order),
+                      Tooltip(
+                        message: 'Editar los productos o el nombre de este pedido',
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blueGrey),
+                          onPressed: () => _createNewOrEditOrder(orderToEdit: order),
+                        ),
                       ),
                       const SizedBox(width: 5),
                       Text(
@@ -86,20 +138,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      // Botón de Eliminación
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        tooltip: 'Finalizar/Eliminar pedido',
-                        onPressed: () {
-                          Provider.of<HomeViewModel>(context, listen: false).removeOrder(order);
-                          
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Pedido finalizado y eliminado'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
+                      Tooltip(
+                        message: 'Marcar como finalizado y borrar de la lista',
+                        child: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _confirmarEliminacion(context, order),
+                        ),
                       ),
                       const Icon(Icons.expand_more, color: Colors.grey),
                     ],
@@ -126,12 +170,15 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _createNewOrEditOrder(),
-        icon: const Icon(Icons.add),
-        label: const Text('Nuevo Pedido'),
-        backgroundColor: const Color.fromARGB(255, 2, 104, 219),
-        foregroundColor: Colors.white,
+      floatingActionButton: Tooltip(
+        message: 'Añadir una nueva comanda',
+        child: FloatingActionButton.extended(
+          onPressed: () => _createNewOrEditOrder(),
+          icon: const Icon(Icons.add),
+          label: const Text('Nuevo Pedido'),
+          backgroundColor: const Color.fromARGB(255, 2, 104, 219),
+          foregroundColor: Colors.white,
+        ),
       ),
     );
   }

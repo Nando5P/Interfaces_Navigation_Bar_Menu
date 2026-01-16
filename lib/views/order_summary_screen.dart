@@ -1,13 +1,30 @@
 import 'package:flutter/material.dart';
 import '../models/productos.dart';
 
-/// Pantalla que muestra el resumen final de un pedido.
+/// Pantalla que muestra el resumen final de un pedido realizado en el bar.
+/// 
+/// Presenta el nombre de la mesa/cliente, la lista detallada de productos 
+/// seleccionados con sus cantidades y el importe total a pagar.
 class OrderSummaryScreen extends StatelessWidget {
   static const routeName = '/resumen';
 
   const OrderSummaryScreen({super.key});
 
-/// Construye la UI de la pantalla de resumen del pedido.
+  /// Muestra un Snackbar de agradecimiento al finalizar el proceso.
+  void _finalizarProceso(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Pedido procesado con éxito. ¡Buen servicio!'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
+    );
+    // Volvemos al inicio tras mostrar el feedback
+    Future.delayed(const Duration(seconds: 1), () {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Recuperar argumentos de la ruta
@@ -20,8 +37,10 @@ class OrderSummaryScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Pedido para: ${order.tableOrName}', 
-                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(
+              'Pedido para: ${order.tableOrName}', 
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)
+            ),
             const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
@@ -29,14 +48,17 @@ class OrderSummaryScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = order.items[index];
                   return ListTile(
-                    leading: Text('${item.quantity}x'),
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.orangeAccent,
+                      child: Text('${item.quantity}', style: const TextStyle(color: Colors.white)),
+                    ),
                     title: Text(item.product.name),
                     trailing: Text('${item.totalPrice.toStringAsFixed(2)} €'),
                   );
                 },
               ),
             ),
-            const Divider(),
+            const Divider(thickness: 2),
             Align(
               alignment: Alignment.centerRight,
               child: Text(
@@ -45,12 +67,31 @@ class OrderSummaryScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Volver'),
-              ),
+            
+            // Botones de acción
+            Row(
+              children: [
+                Expanded(
+                  child: Tooltip(
+                    message: 'Volver a la edición del pedido',
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Corregir'),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Tooltip(
+                    message: 'Confirmar y cerrar el pedido actual',
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                      onPressed: () => _finalizarProceso(context),
+                      child: const Text('Finalizar'),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
